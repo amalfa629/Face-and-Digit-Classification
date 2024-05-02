@@ -8,6 +8,7 @@
 
 import util
 import classificationMethod
+PRINT = True
 
 class MostFrequentClassifier(classificationMethod.ClassificationMethod):
   """
