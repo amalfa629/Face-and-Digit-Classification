@@ -246,7 +246,7 @@ def readCommand( argv ):
   elif(options.classifier == "perceptron"):
     classifier = perceptron.PerceptronClassifier(legalLabels,options.iterations)
   elif(options.classifier == "neuralnetwork"):
-    classifier = neuralNetwork.NeuralNetworkClassifier(legalLabels,options.iterations)
+    classifier = neuralNetwork.NeuralNetworkClassifier(legalLabels, options.iterations)
   elif(options.classifier == "mira"):
     classifier = mira.MiraClassifier(legalLabels, options.iterations)
     if (options.autotune):

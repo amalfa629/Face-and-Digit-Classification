@@ -44,19 +44,20 @@ class PerceptronClassifier:
     self.features = trainingData[0].keys() # could be useful later
     # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
     # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
-    
     for iteration in range(self.max_iterations):
       print "Starting iteration ", iteration, "..."
       retrain = False
       for i in range(len(trainingData)):
         f = []
         for label in self.legalLabels:
-          f.append(0)
+          f.append(self.weights[label]["default"])
           for feature in self.features:
             f[label] += self.weights[label][feature] * trainingData[i][feature]
         maxLabel = f.index(max(f))
         if maxLabel != trainingLabels[i]:
           retrain = True
+          self.weights[maxLabel]["default"] -= 1
+          self.weights[trainingLabels[i]]["default"] += 1
           for feature in self.features:
             self.weights[maxLabel][feature] -= trainingData[i][feature]
             self.weights[trainingLabels[i]][feature] += trainingData[i][feature]

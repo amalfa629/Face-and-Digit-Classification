@@ -5,10 +5,14 @@
 # purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
 # John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
+import random
 
 # Perceptron implementation
 import util
+import math
+import numpy as np
 PRINT = True
+
 
 class NeuralNetworkClassifier:
     """
@@ -21,35 +25,46 @@ class NeuralNetworkClassifier:
         self.legalLabels = legalLabels
         self.type = "neuralnetwork"
         self.max_iterations = max_iterations
-        self.weights = {}
-        for label in legalLabels:
-            self.weights[label] = util.Counter() # this is the data-structure you should use
+        self.weights = [[], []]
+        self.lamb = 0.1
+        self.alpha = 0.1
 
-    def setWeights(self, weights):
-        assert len(weights) == len(self.legalLabels);
-        self.weights == weights;
-
-    def train( self, trainingData, trainingLabels, validationData, validationLabels ):
-        """
-        The training loop for the perceptron passes through the training data several
-        times and updates the weight vector for each label based on classification errors.
-        See the project description for details.
-
-        Use the provided self.weights[label] data structure so that
-        the classify method works correctly. Also, recall that a
-        datum is a counter from features to values for those features
-        (and thus represents a vector a values).
-        """
-
+    def train( self, trainingData, trainingLabels, validationData, validationLabels):
+        n = len(trainingData)
+        g = np.vectorize(lambda z: 1/(1+math.exp(-z)))
         self.features = trainingData[0].keys() # could be useful later
-        # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
-        # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
-
+        for layer in range(0, 2):
+            self.weights[layer] = [[0] * (len(self.features) + 1)] * ((-1*layer + 1)*len(self.features) + layer*len(self.legalLabels))
+            for i in range(0, (-1*layer + 1)*(len(self.features) - 1) + 1):
+                for j in range(0, len(self.features) + 1):
+                      self.weights[layer][i][j] = random.uniform(-1/math.sqrt(len(self.features)), 1/math.sqrt(len(self.features)))
+            self.weights[layer] = np.array(self.weights[layer])
         for iteration in range(self.max_iterations):
             print "Starting iteration ", iteration, "..."
-            for i in range(len(trainingData)):
-                "*** YOUR CODE HERE ***"
-                util.raiseNotDefined()
+            retrain = False
+            gradients = [np.zeros_like(self.weights[0]), np.zeros_like(self.weights[1])]
+            D = gradients
+            for i in range(n):
+                x = [1] * (len(self.features) + 1)
+                a = 1
+                for feature in self.features:
+                    x[a] = trainingData[i][feature]
+                    a += 1
+                x = np.array(x)
+                y = [0] * len(self.legalLabels)
+                y[trainingLabels[i]] = 1
+                a = [x]
+                error = [[]] * 3
+                for layer in range(1, 3):
+                    z = np.matmul(self.weights[layer - 1], a[layer - 1])
+                    a.append(g(z))
+                    if layer < 2:
+                        a[layer] = np.insert(a[layer], 0, 1)
+                error[2] = a[2] - y
+                error[1] = np.matmul(self.weights[1].transpose(), error[2])
+                for layer in range(1, 3):
+                    gradients[layer - 1] = gradients[layer - 1] + error[layer] * a[layer - 1].transpose()
+
 
     def classify(self, data ):
         """
