@@ -42,10 +42,9 @@ class NeuralNetworkClassifier:
             self.weights[layer] = np.array(self.weights[layer])
         previousAccuracies = np.array([np.nan] * 10)
         for iteration in range(self.max_iterations):
-            cost = 0
             if self.alpha <= 0.001:
                 return
-            print "Starting iteration ", iteration, "..."
+            #print "Starting iteration ", iteration, "..."
             correct = 0
             gradients = [np.zeros_like(self.weights[0]), np.zeros_like(self.weights[1])]
             for image in range(n):
@@ -69,16 +68,13 @@ class NeuralNetworkClassifier:
                 error[1] = np.multiply(np.matmul(self.weights[1].T, error[2]), np.multiply(a[1], 1 - a[1]))[1:self.hiddenNodes + 1]
                 for layer in range(1, 3):
                     gradients[layer - 1] = gradients[layer - 1] + np.outer(error[layer], a[layer - 1])
-                cost += np.sum(y * np.log(a[2]) + (1 - y) * np.log(1 - a[2]))
-            cost *= (-1/float(n))
             D = [np.zeros_like(self.weights[0]), np.zeros_like(self.weights[1])]
             for layer in range(1, 3):
                 D[layer - 1] = (1/float(n)) * gradients[layer - 1]
                 D[layer - 1][:][1:len(D[layer - 1][:])] += self.lamb * self.weights[layer - 1][:][1:len(self.weights[layer - 1][:])]
                 self.weights[layer - 1] -= self.alpha * D[layer - 1]
-                cost += self.lamb/float(2 * n) * np.sum(np.power(self.weights[layer - 1], 2))
             accuracy = correct / float(n)
-            print self.alpha
+            #print self.alpha
             previousAccuracies[(iteration % len(previousAccuracies))] = accuracy
             if accuracy < (np.mean(previousAccuracies) + 0.01):
                 self.alpha *= 0.75
